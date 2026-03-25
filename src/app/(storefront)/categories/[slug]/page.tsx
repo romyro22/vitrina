@@ -13,7 +13,7 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const category = await getCategoryBySlug(slug)
-  if (!category) return { title: 'Categoria no encontrada' }
+  if (!category) return { title: 'Categoría no encontrada' }
 
   return {
     title: category.name,
@@ -38,21 +38,34 @@ export default async function CategoryPage({ params, searchParams }: Props) {
     page,
   })
 
-  return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
-      <h1 className="mb-2 text-2xl font-bold text-foreground">{category.name}</h1>
-      {category.description && (
-        <p className="mb-6 text-muted-foreground">{category.description}</p>
-      )}
+  const currencySymbol = settings.currencySymbol ?? '$'
 
+  return (
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10">
+      {/* Category header */}
+      <div className="mb-6">
+        <h1 className="font-[family-name:var(--font-display)] text-2xl font-bold text-foreground sm:text-3xl">
+          {category.name}
+        </h1>
+        {category.description && (
+          <p className="mt-2 max-w-2xl text-base leading-relaxed text-muted-foreground">{category.description}</p>
+        )}
+        <p className="mt-2 text-sm text-muted-foreground">
+          {products.totalDocs} {products.totalDocs === 1 ? 'producto' : 'productos'}
+        </p>
+      </div>
+
+      {/* Category navigation */}
       {categories.docs.length > 0 && (
         <div className="mb-6">
           <CategoryNav categories={categories.docs} activeSlug={slug} />
         </div>
       )}
 
-      <ProductGrid products={products.docs} currencySymbol={settings.currencySymbol ?? '$'} />
+      {/* Product grid */}
+      <ProductGrid products={products.docs} currencySymbol={currencySymbol} />
 
+      {/* Pagination */}
       <Pagination
         currentPage={products.page ?? 1}
         totalPages={products.totalPages}

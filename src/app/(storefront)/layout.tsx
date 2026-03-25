@@ -9,13 +9,13 @@ export default async function StorefrontLayout({
 }) {
   const settings = await getSiteSettings()
   const logoUrl =
-    settings.logo && typeof settings.logo !== 'string' ? settings.logo.url : null
+    settings.logo && typeof settings.logo === 'object' ? settings.logo.url : null
 
   return (
     <div className="flex min-h-screen flex-col">
       <Header storeName={settings.storeName} logoUrl={logoUrl} />
       <main className="flex-1">{children}</main>
-      <Footer storeName={settings.storeName} />
+      <Footer storeName={settings.storeName} whatsappNumber={settings.whatsappNumber} />
     </div>
   )
 }

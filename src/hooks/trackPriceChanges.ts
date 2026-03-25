@@ -1,4 +1,7 @@
 import type { CollectionBeforeChangeHook } from 'payload'
+import { getLogger } from '@/lib/logger'
+
+const log = getLogger('hooks:price-changes')
 
 export const trackPriceChanges: CollectionBeforeChangeHook = async ({
   data,
@@ -20,6 +23,7 @@ export const trackPriceChanges: CollectionBeforeChangeHook = async ({
         newPrice,
       },
     })
+    log.info({ productId: originalDoc.id, oldPrice, newPrice }, 'price_changed')
   }
 
   return data
