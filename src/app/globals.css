@@ -30,8 +30,12 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
+/*
+ * Storefront theme — scoped to .storefront so Payload admin is unaffected.
+ * The storefront layout wrapper applies this class.
+ */
 @layer base {
-  :root {
+  .storefront {
     --background: 30 25% 98%;
     --foreground: 20 20% 12%;
     --card: 30 20% 99%;
@@ -54,7 +58,7 @@
     --radius: 0.625rem;
   }
 
-  .dark {
+  .storefront.dark {
     --background: 20 18% 7%;
     --foreground: 30 15% 93%;
     --card: 20 16% 10%;
@@ -76,11 +80,11 @@
     --ring: 24 80% 55%;
   }
 
-  * {
+  .storefront * {
     @apply border-border;
   }
 
-  body {
+  .storefront {
     @apply bg-background text-foreground;
   }
 }
