@@ -2,6 +2,9 @@ import { Header } from '@/components/header'
 import { Footer } from '@/components/footer'
 import { getSiteSettings } from '@/lib/payload-helpers'
 
+// All storefront pages render dynamically at runtime (no build-time DB needed)
+export const dynamic = 'force-dynamic'
+
 export default async function StorefrontLayout({
   children,
 }: {

@@ -15,15 +15,20 @@ export const trackPriceChanges: CollectionBeforeChangeHook = async ({
   const newPrice = data.price
 
   if (oldPrice !== undefined && newPrice !== undefined && oldPrice !== newPrice) {
-    await req.payload.create({
-      collection: 'price-history',
-      data: {
-        product: originalDoc.id,
-        oldPrice,
-        newPrice,
-      },
-    })
-    log.info({ productId: originalDoc.id, oldPrice, newPrice }, 'price_changed')
+    try {
+      await req.payload.create({
+        collection: 'price-history',
+        data: {
+          product: originalDoc.id,
+          oldPrice,
+          newPrice,
+        },
+        overrideAccess: true, // SAFETY: hook runs server-side; PriceHistory has create: () => false
+      })
+      log.info({ productId: originalDoc.id, oldPrice, newPrice }, 'price_changed')
+    } catch (error) {
+      log.error({ productId: originalDoc.id, error }, 'price_history_create_failed')
+    }
   }
 
   return data

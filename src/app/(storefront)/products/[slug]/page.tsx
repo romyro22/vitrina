@@ -38,7 +38,7 @@ export default async function ProductPage({ params }: Props) {
 
   const images = Array.isArray(product.images)
     ? product.images
-        .filter((img): img is Media => typeof img !== 'string' && typeof img === 'object' && 'url' in img)
+        .filter((img): img is Media => typeof img === 'object' && img !== null)
         .map((img) => ({
           id: img.id,
           url: img.url ?? '',

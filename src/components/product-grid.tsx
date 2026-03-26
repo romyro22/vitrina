@@ -9,6 +9,7 @@ interface ProductGridProps {
 function getImageUrl(product: Product): string | undefined {
   const firstImage = Array.isArray(product.images) ? product.images[0] : undefined
   if (!firstImage || typeof firstImage === 'number') return undefined
+  // SAFETY: typeof guard above eliminates `number` from the union `number | Media`
   const media = firstImage as Media
   return media.sizes?.card?.url || media.sizes?.thumbnail?.url || media.url || undefined
 }
@@ -16,6 +17,7 @@ function getImageUrl(product: Product): string | undefined {
 function getImageAlt(product: Product): string {
   const firstImage = Array.isArray(product.images) ? product.images[0] : undefined
   if (!firstImage || typeof firstImage === 'number') return product.name
+  // SAFETY: typeof guard above eliminates `number` from the union `number | Media`
   return (firstImage as Media).alt || product.name
 }
 

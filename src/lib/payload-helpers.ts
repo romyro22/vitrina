@@ -1,3 +1,4 @@
+import { cache } from 'react'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 import { getLogger } from '@/lib/logger'
@@ -51,8 +52,8 @@ export async function getProducts(options?: {
   return result
 }
 
-/** Fetches a single product by its unique slug */
-export async function getProductBySlug(slug: string) {
+/** Fetches a single product by its unique slug — deduplicated per request via React cache() */
+export const getProductBySlug = cache(async (slug: string) => {
   const start = Date.now()
   const payload = await getPayloadClient()
   const result = await payload.find({
@@ -68,7 +69,7 @@ export async function getProductBySlug(slug: string) {
     log.warn({ slug, durationMs: Date.now() - start }, 'product_not_found')
   }
   return product
-}
+})
 
 /** Fetches all active categories sorted by sortOrder — cached for 5 min */
 export async function getCategories() {
@@ -87,8 +88,8 @@ export async function getCategories() {
   }, CACHE_TTL_CATEGORIES)
 }
 
-/** Fetches a single category by its unique slug */
-export async function getCategoryBySlug(slug: string) {
+/** Fetches a single category by its unique slug — deduplicated per request via React cache() */
+export const getCategoryBySlug = cache(async (slug: string) => {
   const start = Date.now()
   const payload = await getPayloadClient()
   const result = await payload.find({
@@ -104,7 +105,7 @@ export async function getCategoryBySlug(slug: string) {
     log.warn({ slug, durationMs: Date.now() - start }, 'category_not_found')
   }
   return category
-}
+})
 
 /** Searches products by name (like match) with pagination */
 export async function searchProducts(query: string, page = 1) {

@@ -16,14 +16,15 @@ COPY . .
 
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Compile-only mode: builds the app WITHOUT static page generation,
-# so no database connection is needed during the Docker build.
-# Pages are rendered dynamically at runtime instead.
-# See: https://payloadcms.com/docs/production/building-without-a-db-connection
-RUN npx next build --experimental-build-mode compile
+# Build-time placeholders — Payload validates config at build but does not
+# connect to DB at build time (storefront uses force-dynamic, admin is dynamic).
+# Real values are injected at runtime via docker-compose environment.
+ARG PAYLOAD_SECRET=build-time-placeholder-not-used-at-runtime
+ARG DATABASE_URL=postgresql://placeholder:placeholder@localhost:5432/placeholder
+ENV PAYLOAD_SECRET=${PAYLOAD_SECRET}
+ENV DATABASE_URL=${DATABASE_URL}
 
-# Inline NEXT_PUBLIC_* env vars without requiring a DB connection.
-RUN npx next build --experimental-build-mode generate-env
+RUN npm run build
 
 # Stage 4 — Production runner
 FROM base AS runner
