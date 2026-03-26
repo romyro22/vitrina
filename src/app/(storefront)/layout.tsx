@@ -1,5 +1,6 @@
 import { Header } from '@/components/header'
 import { Footer } from '@/components/footer'
+import { WhatsAppFab } from '@/components/whatsapp-fab'
 import { getSiteSettings } from '@/lib/payload-helpers'
 
 // All storefront pages render dynamically at runtime (no build-time DB needed)
@@ -19,6 +20,9 @@ export default async function StorefrontLayout({
       <Header storeName={settings.storeName} logoUrl={logoUrl} />
       <main className="flex-1">{children}</main>
       <Footer storeName={settings.storeName} whatsappNumber={settings.whatsappNumber} />
+      {settings.whatsappNumber && (
+        <WhatsAppFab whatsappNumber={settings.whatsappNumber} />
+      )}
     </div>
   )
 }

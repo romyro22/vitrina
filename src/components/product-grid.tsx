@@ -21,6 +21,13 @@ function getImageAlt(product: Product): string {
   return (firstImage as Media).alt || product.name
 }
 
+function getBlurDataUrl(product: Product): string | undefined {
+  const firstImage = Array.isArray(product.images) ? product.images[0] : undefined
+  if (!firstImage || typeof firstImage === 'number') return undefined
+  // SAFETY: typeof guard above eliminates `number` from the union `number | Media`
+  return (firstImage as Media).blurDataUrl ?? undefined
+}
+
 /** Responsive product grid with staggered animation and empty state */
 export function ProductGrid({ products, currencySymbol = '$' }: ProductGridProps) {
   if (products.length === 0) {
@@ -51,6 +58,7 @@ export function ProductGrid({ products, currencySymbol = '$' }: ProductGridProps
             currencySymbol={currencySymbol}
             imageUrl={getImageUrl(product)}
             imageAlt={getImageAlt(product)}
+            blurDataUrl={getBlurDataUrl(product)}
             isAvailable={product.isAvailable ?? true}
           />
         </div>

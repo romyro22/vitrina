@@ -10,6 +10,7 @@ interface ProductCardProps {
   currencySymbol?: string
   imageUrl?: string
   imageAlt?: string
+  blurDataUrl?: string | null
   isAvailable?: boolean
 }
 
@@ -22,6 +23,7 @@ export function ProductCard({
   currencySymbol = '$',
   imageUrl,
   imageAlt,
+  blurDataUrl,
   isAvailable = true,
 }: ProductCardProps) {
   return (
@@ -38,6 +40,8 @@ export function ProductCard({
             fill
             className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            placeholder={blurDataUrl ? 'blur' : 'empty'}
+            blurDataURL={blurDataUrl ?? undefined}
           />
         ) : (
           <div className="flex h-full items-center justify-center text-sm text-muted-foreground/60">

@@ -8,6 +8,7 @@ interface GalleryImage {
   url: string
   alt: string
   thumbnailUrl?: string | null
+  blurDataUrl?: string | null
 }
 
 interface ProductImageGalleryProps {
@@ -42,6 +43,8 @@ export function ProductImageGallery({ images, productName }: ProductImageGallery
           className="object-cover"
           sizes="(max-width: 1024px) 100vw, 50vw"
           priority
+          placeholder={selected.blurDataUrl ? 'blur' : 'empty'}
+          blurDataURL={selected.blurDataUrl ?? undefined}
         />
       </div>
 

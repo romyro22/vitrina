@@ -4,7 +4,9 @@ import { ChevronRight, Package, ShieldCheck } from 'lucide-react'
 import { WhatsAppButton } from '@/components/whatsapp-button'
 import { ProductImageGallery } from '@/components/product-image-gallery'
 import { RichTextRenderer } from '@/components/rich-text-renderer'
-import { getProductBySlug, getSiteSettings } from '@/lib/payload-helpers'
+import { getProductBySlug, getRelatedProducts, getSiteSettings } from '@/lib/payload-helpers'
+import { ProductGrid } from '@/components/product-grid'
+import { ProductJsonLd } from '@/components/product-json-ld'
 import type { Metadata } from 'next'
 import type { Media } from '@/payload-types'
 
@@ -44,6 +46,7 @@ export default async function ProductPage({ params }: Props) {
           url: img.url ?? '',
           alt: img.alt || product.name,
           thumbnailUrl: img.sizes?.thumbnail?.url ?? null,
+          blurDataUrl: img.blurDataUrl ?? null,
         }))
     : []
 
@@ -54,7 +57,15 @@ export default async function ProductPage({ params }: Props) {
 
   const currencySymbol = settings.currencySymbol ?? '$'
 
+  const relatedProducts = category
+    ? await getRelatedProducts(category.id, product.id)
+    : null
+
+  const siteUrl = process.env.NEXT_PUBLIC_SERVER_URL ?? 'http://localhost:3000'
+
   return (
+    <>
+    <ProductJsonLd product={product} currencySymbol={currencySymbol} siteUrl={siteUrl} />
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-10">
       {/* Breadcrumbs */}
       <nav className="mb-6 flex items-center gap-1.5 text-sm text-muted-foreground" aria-label="Breadcrumb">
@@ -164,6 +175,17 @@ export default async function ProductPage({ params }: Props) {
           )}
         </div>
       </div>
+
+      {/* Related products */}
+      {relatedProducts && relatedProducts.docs.length > 0 && (
+        <section className="mt-16 border-t border-border/40 pt-10">
+          <h2 className="mb-6 font-[family-name:var(--font-display)] text-xl font-bold text-foreground">
+            También te puede interesar
+          </h2>
+          <ProductGrid products={relatedProducts.docs} currencySymbol={currencySymbol} />
+        </section>
+      )}
     </div>
+    </>
   )
 }

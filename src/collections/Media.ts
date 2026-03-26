@@ -1,9 +1,13 @@
 import type { CollectionConfig } from 'payload'
+import { generateBlurPlaceholder } from '../hooks/generateBlurPlaceholder'
 
 export const Media: CollectionConfig = {
   slug: 'media',
   access: {
     read: () => true,
+  },
+  hooks: {
+    afterChange: [generateBlurPlaceholder],
   },
   upload: {
     staticDir: 'media',
@@ -31,6 +35,15 @@ export const Media: CollectionConfig = {
       name: 'alt',
       type: 'text',
       required: true,
+    },
+    {
+      name: 'blurDataUrl',
+      type: 'text',
+      admin: {
+        readOnly: true,
+        position: 'sidebar',
+        description: 'Auto-generated blur placeholder for Next.js Image',
+      },
     },
   ],
 }

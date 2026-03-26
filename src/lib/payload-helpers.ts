@@ -107,6 +107,28 @@ export const getCategoryBySlug = cache(async (slug: string) => {
   return category
 })
 
+/** Fetches related products from the same category, excluding the given product ID */
+export async function getRelatedProducts(categoryId: number, excludeProductId: number, limit = 4) {
+  const start = Date.now()
+  const payload = await getPayloadClient()
+  const result = await payload.find({
+    collection: 'products',
+    where: {
+      isAvailable: { equals: true },
+      category: { equals: categoryId },
+      id: { not_equals: excludeProductId },
+    },
+    limit,
+    sort: '-createdAt',
+    depth: 2,
+  })
+  log.info(
+    { categoryId, excludeProductId, count: result.totalDocs, durationMs: Date.now() - start },
+    'related_products_fetched',
+  )
+  return result
+}
+
 /** Searches products by name (like match) with pagination */
 export async function searchProducts(query: string, page = 1) {
   const start = Date.now()
