@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: postgres:17-alpine
+    image: postgres:18.6-alpine
     environment:
       POSTGRES_DB: vitrina
       POSTGRES_USER: postgres
@@ -8,7 +8,9 @@ services:
     ports:
       - '5433:5432'
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      # PG 18+ stores data in major-version subdirectories, so the mount moves up
+      # one level: the image places PGDATA at /var/lib/postgresql/<major>/docker.
+      - pgdata:/var/lib/postgresql
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U postgres']
       interval: 10s
@@ -34,7 +36,7 @@ services:
     environment:
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/vitrina
       PAYLOAD_SECRET: ${PAYLOAD_SECRET:?Set PAYLOAD_SECRET in .env or environment (min 32 chars)}
-      NEXT_PUBLIC_SERVER_URL: http://localhost:3000
+      SERVER_URL: ${SERVER_URL:-http://localhost:3000}
       VALKEY_URL: redis://valkey:6379
     volumes:
       - ./media:/app/media
@@ -44,7 +46,9 @@ services:
       valkey:
         condition: service_healthy
     healthcheck:
-      test: ['CMD-SHELL', 'wget -qO- http://localhost:3000/ || exit 1']
+      # 127.0.0.1 y no localhost: dentro del contenedor localhost resuelve primero a ::1,
+      # y el servidor escucha solo en IPv4, asi que por nombre la sonda da connection refused.
+      test: ['CMD-SHELL', 'wget -qO- http://127.0.0.1:3000/ || exit 1']
       interval: 30s
       timeout: 10s
       retries: 3

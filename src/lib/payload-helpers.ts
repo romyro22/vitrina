@@ -15,7 +15,7 @@ export async function getPayloadClient() {
 }
 
 /** Fetches the global site settings (store name, WhatsApp, currency, etc.) — cached for 5 min */
-export async function getSiteSettings() {
+export const getSiteSettings = cache(async () => {
   return getCached('vitrina:site-settings', async () => {
     const start = Date.now()
     const payload = await getPayloadClient()
@@ -23,7 +23,7 @@ export async function getSiteSettings() {
     log.info({ durationMs: Date.now() - start }, 'site_settings_fetched')
     return settings
   }, CACHE_TTL_SETTINGS)
-}
+})
 
 /** Fetches paginated products with optional filters and sorting */
 export async function getProducts(options?: {

@@ -33,6 +33,11 @@ export const generateBlurPlaceholder: CollectionAfterChangeHook = async ({
       id: doc.id,
       data: { blurDataUrl },
       overrideAccess: true, // SAFETY: server-side hook, bypass access control
+      // Joining the caller's transaction is mandatory: without `req` this opens a
+      // second transaction against a row the outer one still holds locked, and the
+      // update blocks forever instead of failing. Recursion is cut by the
+      // blurDataUrl guard above, which is set by the time afterChange re-fires.
+      req,
     })
 
     log.info({ mediaId: doc.id }, 'blur_placeholder_generated')

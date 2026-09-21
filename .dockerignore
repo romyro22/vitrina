@@ -2,12 +2,14 @@ node_modules
 .next
 .git
 .gitignore
-.env
-.env*.local
+.dockerignore
+.env*
 media
+coverage
 .vscode
 .idea
 .claude
+.serena
 tests
 *.md
 docker-compose.yml

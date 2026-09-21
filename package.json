@@ -13,6 +13,7 @@
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
     "seed": "tsx --tsconfig scripts/tsconfig.json scripts/seed.ts",
+    "backfill:og": "tsx --tsconfig scripts/tsconfig.json scripts/backfill-og-sizes.ts",
     "generate:types": "payload generate:types"
   },
   "dependencies": {

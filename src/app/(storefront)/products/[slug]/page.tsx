@@ -7,11 +7,62 @@ import { RichTextRenderer } from '@/components/rich-text-renderer'
 import { getProductBySlug, getRelatedProducts, getSiteSettings } from '@/lib/payload-helpers'
 import { ProductGrid } from '@/components/product-grid'
 import { ProductJsonLd } from '@/components/product-json-ld'
+import { getSiteUrl } from '@/lib/site-url'
 import type { Metadata } from 'next'
-import type { Media } from '@/payload-types'
+import type { Media, Product } from '@/payload-types'
 
 interface Props {
   params: Promise<{ slug: string }>
+}
+
+interface OgImageDescriptor {
+  url: string
+  width: number
+  height: number
+  alt: string
+}
+
+/**
+ * Resolves the best available Open Graph image for a product, as an absolute URL.
+ *
+ * Falls back og -> card -> original, and returns null when the product has no
+ * images so the caller can omit the tag entirely rather than emit a broken one.
+ */
+function resolveOgImage(product: Product, siteUrl: string): OgImageDescriptor | null {
+  const firstImage = product.images?.[0]
+  if (!firstImage || typeof firstImage === 'number') return null
+
+  // Always read the delivered dimensions, never the configured target: sharp does
+  // not upscale, so a source narrower than 1200px yields a smaller `og` than set.
+  const candidate = firstImage.sizes?.og?.url
+    ? {
+        url: firstImage.sizes.og.url,
+        width: firstImage.sizes.og.width ?? 1200,
+        height: firstImage.sizes.og.height ?? 630,
+      }
+    : firstImage.sizes?.card?.url
+      ? {
+          url: firstImage.sizes.card.url,
+          width: firstImage.sizes.card.width ?? 768,
+          height: firstImage.sizes.card.height ?? 1024,
+        }
+      : firstImage.url
+        ? {
+            url: firstImage.url,
+            width: firstImage.width ?? 1200,
+            height: firstImage.height ?? 630,
+          }
+        : null
+
+  if (!candidate) return null
+
+  return {
+    ...candidate,
+    // Payload emits relative URLs (no serverURL in payload.config.ts); this makes
+    // them absolute. An already-absolute URL passes through unchanged.
+    url: new URL(candidate.url, siteUrl).toString(),
+    alt: firstImage.alt || product.name,
+  }
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -19,12 +70,28 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const product = await getProductBySlug(slug)
   if (!product) return { title: 'Producto no encontrado' }
 
+  const settings = await getSiteSettings()
+  const siteUrl = getSiteUrl()
+  const ogImage = resolveOgImage(product, siteUrl)
+  const description = `${product.name} - Consulta el precio por WhatsApp`
+
   return {
     title: product.name,
-    description: `${product.name} - Consulta el precio por WhatsApp`,
+    description,
     openGraph: {
       title: product.name,
+      description,
+      url: `${siteUrl}/products/${product.slug}`,
+      siteName: settings.storeName,
+      locale: 'es_AR',
       type: 'website',
+      ...(ogImage ? { images: [ogImage] } : {}),
+    },
+    twitter: {
+      card: ogImage ? 'summary_large_image' : 'summary',
+      title: product.name,
+      description,
+      ...(ogImage ? { images: [ogImage.url] } : {}),
     },
   }
 }
@@ -61,7 +128,7 @@ export default async function ProductPage({ params }: Props) {
     ? await getRelatedProducts(category.id, product.id)
     : null
 
-  const siteUrl = process.env.NEXT_PUBLIC_SERVER_URL ?? 'http://localhost:3000'
+  const siteUrl = getSiteUrl()
 
   return (
     <>

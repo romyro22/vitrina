@@ -15,17 +15,26 @@
 # debug
 npm-debug.log*
 
-# env files
-.env
-.env*.local
+# env files — every variant is ignored except the checked-in template
+.env*
+!.env.example
 
 # typescript
 *.tsbuildinfo
 next-env.d.ts
 
+# test coverage
+/coverage/
+
 # payload
+# Uploaded media is user content, and payload-types.ts is generated output.
+# Regenerate the types after cloning or after any collection change:
+#   npm run generate:types   (deterministic, no database connection required)
 /media/
 payload-types.ts
+
+# local tooling caches
+.serena/
 
 # IDE
 .vscode/
